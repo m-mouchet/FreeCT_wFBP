@@ -27,7 +27,7 @@
 #include <pwd.h>
 
 #include <setup.h>
-#include <read_raw_file.h>
+#include <fct/fct_read.h>
 
 #define pi 3.1415926535897f
 #define BLOCK_SLICES 32
