@@ -40,7 +40,6 @@ else
 	chmod +x ${SCRIPT_PATH}fct_wfbp
 	@echo "#!/bin/bash" > ${SCRIPT_PATH}fct_wfbp
 	@echo ${INSTALL_PATH}fct_wfbp \"\$$\@\" >> ${SCRIPT_PATH}fct_wfbp
-	@echo notify-send \"Reconstruction completed\" >> ${SCRIPT_PATH}fct_wfbp
 endif
 
 

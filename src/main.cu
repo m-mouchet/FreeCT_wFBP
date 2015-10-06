@@ -50,7 +50,7 @@ void split_path_file(char** p, char** f, char *pf);
 
 void usage(){
     printf("\n");
-    printf("usage: recon [options] input_prm_file\n\n");
+    printf("usage: fct_wfbp [options] input_prm_file\n\n");
     printf("    Options:\n");
     printf("          -v: verbose.\n");
     printf("          -t: test files will be written to desktop.\n");
