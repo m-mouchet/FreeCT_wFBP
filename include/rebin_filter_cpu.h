@@ -1,4 +1,4 @@
-/* CTBangBang is GPU and CPU CT reconstruction Software */
+/* FreeCT_wFBP is GPU and CPU CT reconstruction Software */
 /* Copyright (C) 2015  John Hoffman */
 
 /* This program is free software; you can redistribute it and/or */
