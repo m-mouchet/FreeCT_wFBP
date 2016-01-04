@@ -69,6 +69,10 @@ struct recon_params configure_recon_params(char * filename){
 	    token=strtok(NULL," \t\n%");
 	    sscanf(token,"%s",prms.raw_data_file);
 	}
+	else if (strcmp(token,"OutputDir:")==0){
+	    token=strtok(NULL," \t\n%");
+	    sscanf(token,"%s",prms.output_dir);
+	}
 	else if (strcmp(token,"Nrows:")==0){
 	    token=strtok(NULL," \t\n%");
 	    sscanf(token,"%i",&prms.n_rows);
@@ -85,7 +89,7 @@ struct recon_params configure_recon_params(char * filename){
 	    token=strtok(NULL," \t\n%");
 	    sscanf(token,"%f",&prms.end_pos);
 	}
-	else if (strcmp(token,"PitchValue:")==0){
+	else if ((strcmp(token,"PitchValue:")==0)||(strcmp(token,"TableFeed:")==0)){
 	    token=strtok(NULL," \t\n%");
 	    sscanf(token,"%f",&prms.pitch_value);
 	}
@@ -380,9 +384,11 @@ struct ct_geom configure_ct_geom(struct recon_metadata *mr){
  	// Physical geometry of the scanner (cannot change from scan to scan) 
  	cg.r_f=570.0f; 
  	cg.src_to_det=1040.0f; 
- 	cg.anode_angle=12.0f*pi/180.0f; 
- 	cg.fan_angle_increment=0.07758621f*pi/180.0f; 
- 	cg.theta_cone=2.0f*atan(7.5f*1.2f/cg.r_f); 
+ 	//cg.anode_angle=12.0f*pi/180.0f;
+ 	cg.anode_angle=7.0f*pi/180.0f;
+ 	cg.fan_angle_increment=0.07758621f*pi/180.0f;
+ 	//cg.theta_cone=2.0f*atan(7.5f*1.2f/cg.r_f);
+ 	cg.theta_cone=2.0f*atan(7.5f*1.2f/cg.r_f); 	
  	cg.central_channel=334.25f; 
 
  	// Size and setup of the detector helix 
@@ -434,19 +440,25 @@ void configure_reconstruction(struct recon_metadata *mr){
 		mr->table_positions[i]=((float)rp.n_readings/(float)cg.n_proj_ffs)*cg.z_rot-(float)i*cg.z_rot/(float)cg.n_proj_ffs;
 	    }	
 	    break;}
-    case 1:{; //PTR
+    case 1:{; //DefinitionAS Raw
 	    for (int i=0;i<rp.n_readings;i++){
 		mr->tube_angles[i]=ReadPTRTubeAngle(raw_file,i,cg.n_channels,cg.n_rows_raw);
 		mr->table_positions[i]=(double)ReadPTRTablePosition(raw_file,i,cg.n_channels,cg.n_rows_raw)/1000.0;
 	    }
 	    break;}
-    case 2:{; //CTD
+    case 2:{; //CTD v1794 (Pre 2015 Sensation64)
 	    for (int i=0;i<rp.n_readings;i++){
-		mr->tube_angles[i]=ReadCTDTubeAngle(raw_file,i,cg.n_channels,cg.n_rows_raw);
-		mr->table_positions[i]=(double)ReadCTDTablePosition(raw_file,i,cg.n_channels,cg.n_rows_raw)/1000.0;
+		mr->tube_angles[i]=ReadCTDv1794TubeAngle(raw_file,i,cg.n_channels,cg.n_rows_raw);
+		mr->table_positions[i]=(double)ReadCTDv1794TablePosition(raw_file,i,cg.n_channels,cg.n_rows_raw)/1000.0;
 	    }
 	    break;}
-    case 3:{; //IMA
+    case 3:{; //CTD v2007 (Post 2015 Sensation64)
+	    for (int i=0;i<rp.n_readings;i++){
+		mr->tube_angles[i]=ReadCTDv2007TubeAngle(raw_file,i,cg.n_channels,cg.n_rows_raw);
+		mr->table_positions[i]=(double)ReadCTDv2007TablePosition(raw_file,i,cg.n_channels,cg.n_rows_raw)/1000.0;
+	    }
+	    break;}
+    case 4:{; //IMA (can wrap any of the above (except binary)
 	    int raw_data_subtype=mr->rp.file_subtype; // Determine if we're looking for PTR or CTD
 	
 	    for (int i=0;i<rp.n_readings;i++){
@@ -454,9 +466,21 @@ void configure_reconstruction(struct recon_metadata *mr){
 		mr->table_positions[i]=(double)ReadIMATablePosition(raw_file,i,cg.n_channels,cg.n_rows_raw,raw_data_subtype,rp.raw_data_offset)/1000.0;
 	    }
 	    break;}
+    case 5:{; //Force Raw
+	    for (int i=0;i<rp.n_readings;i++){
+		mr->tube_angles[i]=ReadForceTubeAngle(raw_file,i,cg.n_channels,cg.n_rows_raw);
+		mr->table_positions[i]=(double)ReadForceTablePosition(raw_file,i,cg.n_channels,cg.n_rows_raw)/1000.0;
+	    }
+	    break;}
+    case 6:{; //DICOM Raw
+	    for (int i=0;i<rp.n_readings;i++){
+		mr->tube_angles[i]=ReadDICOMTubeAngle(raw_file,i,cg.n_channels,cg.n_rows_raw);
+		mr->table_positions[i]=(double)ReadDICOMTablePosition(raw_file,i,cg.n_channels,cg.n_rows_raw)/1000.0;
+	    }
+	    break;}
     }
     fclose(raw_file);
-    
+
     /* --- Figure out how many and which projections to grab --- */
     int n_ffs=pow(2,rp.z_ffs)*pow(2,rp.phi_ffs);
     int n_slices_block=BLOCK_SLICES;
@@ -510,16 +534,22 @@ void configure_reconstruction(struct recon_metadata *mr){
     
     int idx_pull_start;
     int idx_pull_end;
+
+    int pre_post_buffer=cg.n_proj_ffs/2;
+    if (rp.z_ffs==1){
+	pre_post_buffer=cg.n_proj_ffs/2;
+    }
+    
     if (idx_slice_start>idx_slice_end){
-	idx_pull_start=idx_slice_end-cg.n_proj_ffs/2-cg.add_projections_ffs;
+	idx_pull_start=idx_slice_end-pre_post_buffer-cg.add_projections_ffs;
 	idx_pull_start=(idx_pull_start-1)+(n_ffs-(idx_pull_start-1)%n_ffs);
-	idx_pull_end=idx_slice_start+cg.n_proj_ffs/2+cg.add_projections_ffs;
+	idx_pull_end=idx_slice_start+pre_post_buffer+cg.add_projections_ffs;
 	idx_pull_end=(idx_pull_end-1)+(n_ffs-(idx_pull_end-1)%n_ffs);
     }
     else{
-	idx_pull_start=idx_slice_start-cg.n_proj_ffs/2-cg.add_projections_ffs;
+	idx_pull_start=idx_slice_start-pre_post_buffer-cg.add_projections_ffs;
 	idx_pull_start=(idx_pull_start-1)+(n_ffs-(idx_pull_start-1)%n_ffs);
-	idx_pull_end=idx_slice_end+cg.n_proj_ffs/2+cg.add_projections_ffs;
+	idx_pull_end=idx_slice_end+pre_post_buffer+cg.add_projections_ffs;
 	idx_pull_end=(idx_pull_end-1)+(n_ffs-(idx_pull_end-1)%n_ffs);
     }
 
@@ -579,16 +609,22 @@ void update_block_info(recon_metadata *mr){
     
     int idx_pull_start;
     int idx_pull_end;
+
+    int pre_post_buffer=cg.n_proj_ffs/2;
+    if (rp.z_ffs==1){
+	pre_post_buffer=cg.n_proj_ffs/2;
+    }
+
     if (idx_block_slice_start>idx_block_slice_end){
-	idx_pull_start=idx_block_slice_end-cg.n_proj_ffs/2-cg.add_projections_ffs;
+	idx_pull_start=idx_block_slice_end-pre_post_buffer-cg.add_projections_ffs;
 	idx_pull_start=(idx_pull_start-1)+(n_ffs-(idx_pull_start-1)%n_ffs);
-	idx_pull_end=idx_block_slice_start+cg.n_proj_ffs/2+cg.add_projections_ffs;
+	idx_pull_end=idx_block_slice_start+pre_post_buffer+cg.add_projections_ffs;
 	idx_pull_end=(idx_pull_end-1)+(n_ffs-(idx_pull_end-1)%n_ffs);
     }
     else{
-	idx_pull_start=idx_block_slice_start-cg.n_proj_ffs/2-cg.add_projections_ffs;
+	idx_pull_start=idx_block_slice_start-pre_post_buffer-cg.add_projections_ffs;
 	idx_pull_start=(idx_pull_start-1)+(n_ffs-(idx_pull_start-1)%n_ffs);
-	idx_pull_end=idx_block_slice_end+cg.n_proj_ffs/2+cg.add_projections_ffs;
+	idx_pull_end=idx_block_slice_end+pre_post_buffer+cg.add_projections_ffs;
 	idx_pull_end=(idx_pull_end-1)+(n_ffs-(idx_pull_end-1)%n_ffs);
     }
 
@@ -632,38 +668,65 @@ void extract_projections(struct recon_metadata * mr){
 	    }
 	}
 	break;}
-    case 1:{ // PTR
+    case 1:{ // DefinitionAS
 	for (int i=0;i<mr->ri.n_proj_pull;i++){
 	    ReadPTRFrame(raw_file,mr->ri.idx_pull_start+i,cg.n_channels,cg.n_rows_raw,frame_holder);
 	    for (int j=0;j<cg.n_channels*cg.n_rows_raw;j++){
-		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j]/2294.5f;
+		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j];
 	    }
 	}
 	break;}
-    case 2:{ // CTD
+    case 2:{ // CTD v1794 
 	for (int i=0;i<mr->ri.n_proj_pull;i++){
-	    ReadCTDFrame(raw_file,mr->ri.idx_pull_start+i,cg.n_channels,cg.n_rows_raw,frame_holder);
+	    ReadCTDv1794Frame(raw_file,mr->ri.idx_pull_start+i,cg.n_channels,cg.n_rows_raw,frame_holder);
 	    for (int j=0;j<cg.n_channels*cg.n_rows_raw;j++){
-		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j]/2294.5f;
+		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j];
 	    }
 	}
 	break;}
-    case 3:{ // IMA (wraps either PTR or IMA)
+    case 3:{ // CTD v2007
+	for (int i=0;i<mr->ri.n_proj_pull;i++){
+	    ReadCTDv2007Frame(raw_file,mr->ri.idx_pull_start+i,cg.n_channels,cg.n_rows_raw,frame_holder);
+	    for (int j=0;j<cg.n_channels*cg.n_rows_raw;j++){
+		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j];
+	    }
+	}
+	break;}
+    case 4:{ // IMA (wraps either PTR or IMA)
 	int raw_data_subtype=rp.file_subtype;
 	for (int i=0;i<mr->ri.n_proj_pull;i++){
 	    ReadIMAFrame(raw_file,mr->ri.idx_pull_start+i,cg.n_channels,cg.n_rows_raw,frame_holder,raw_data_subtype,rp.raw_data_offset);
 	    for (int j=0;j<cg.n_channels*cg.n_rows_raw;j++){
-		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j]/2294.5f;
+		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j];
 	    }
 	}
 	break;}	
+    case 5:{ //Force Raw
+	for (int i=0;i<mr->ri.n_proj_pull;i++){
+	    
+	    ReadForceFrame(raw_file,mr->ri.idx_pull_start+i,cg.n_channels,cg.n_rows_raw,frame_holder);
+
+	    for (int j=0;j<cg.n_channels*cg.n_rows_raw;j++){
+	    	mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j];
+	    }
+
+	}
+	break;}
+    case 6:{ //DICOM Raw
+	for (int i=0;i<mr->ri.n_proj_pull;i++){
+	    ReadDICOMFrame(raw_file,mr->ri.idx_pull_start+i,cg.n_channels,cg.n_rows_raw,frame_holder);
+	    for (int j=0;j<cg.n_channels*cg.n_rows_raw;j++){
+		mr->ctd.raw[j+cg.n_channels*cg.n_rows_raw*i]=frame_holder[j];
+	    }
+	}
+	break;}
     }
 
     // Check "testing" flag, write raw to disk if set
     if (mr->flags.testing){
 	char fullpath[4096+255];
-	strcpy(fullpath,mr->homedir);
-	strcat(fullpath,"/Desktop/raw.ct_test");
+	strcpy(fullpath,mr->output_dir);
+	strcat(fullpath,"raw.ct_test");
 	FILE * outfile=fopen(fullpath,"w");
 	fwrite(mr->ctd.raw,sizeof(float),cg.n_channels*cg.n_rows_raw*mr->ri.n_proj_pull,outfile);
 	fclose(outfile);
@@ -721,14 +784,12 @@ void finish_and_cleanup(struct recon_metadata * mr){
 
     float * recon_locations;
     recon_locations=(float*)calloc(n_slices_final,sizeof(float));
-    printf("Recon locations requested:\n");
     for (int i=0;i<n_slices_final;i++){
 	recon_locations[i]=rp.start_pos+recon_direction*i*rp.slice_thickness;
     }
 
     float * raw_recon_locations;
     raw_recon_locations=(float*)calloc(n_raw_images,sizeof(float));
-    printf("raw_recon_locations:\n");
     for (int i=0;i<n_raw_images;i++){
 	raw_recon_locations[i]=ri.recon_start_pos+recon_direction*i*rp.coll_slicewidth;//(rp.start_pos-recon_direction*rp.slice_thickness)+recon_direction*i*rp.coll_slicewidth;
     }
@@ -763,7 +824,7 @@ void finish_and_cleanup(struct recon_metadata * mr){
 
     // Write the image data to disk    
     char fullpath[4096+255]={0};
-    sprintf(fullpath,"%s/Desktop/%s.img",mr->homedir,mr->rp.raw_data_file);
+    sprintf(fullpath,"%s%s.img",mr->output_dir,mr->rp.raw_data_file);
     FILE * outfile=fopen(fullpath,"w");
     fwrite(final_image_stack,sizeof(float),rp.nx*rp.ny*n_slices_final,outfile);
     fclose(outfile);
@@ -771,8 +832,8 @@ void finish_and_cleanup(struct recon_metadata * mr){
     // Check "testing" flag, if set write all reconstructed data to disk
     if (mr->flags.testing){
 	char fullpath[4096+255];
-	strcpy(fullpath,mr->homedir);
-	strcat(fullpath,"/Desktop/image_data.ct_test");
+	strcpy(fullpath,mr->output_dir);
+	strcat(fullpath,"image_data.ct_test");
 	FILE * outfile=fopen(fullpath,"w");
 	fwrite(temp_out,sizeof(float),rp.nx*rp.ny*n_slices_final,outfile);
 	fclose(outfile);

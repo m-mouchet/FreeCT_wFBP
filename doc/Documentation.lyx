@@ -1,0 +1,3526 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{listings}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{rotating}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\newcolumntype{$}{>{\global\let\currentrowstyle\relax}}
+\newcolumntype{^}{>{\currentrowstyle}}
+\newcommand{\rowstyle}[1]{\gdef\currentrowstyle{#1}%
+#1\ignorespaces
+}
+\end_preamble
+\options unicode=true,hidelinks
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman lmodern
+\font_sans lmss
+\font_typewriter lmtt
+\font_default_family rmdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.54cm
+\topmargin 2.54cm
+\rightmargin 2.54cm
+\bottommargin 2.54cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip bigskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Intro to FreeCT_wFBP
+\end_layout
+
+\begin_layout Author
+John Hoffman
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Disclaimer
+\end_layout
+
+\begin_layout Standard
+First and foremost we would like to remind users that all FreeCT_wFBP resources
+ and code are released under the GNU GPL v2.0 (https://www.gnu.org/licenses/old-lic
+enses/gpl-2.0.en.html) and as such comes with the following disclaimer: 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\emph on
+This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the Free
+ Software Foundation; either version 2 of the License, or (at your option)
+ any later version.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\emph on
+This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.
+ See the GNU General Public License for more details.
+\end_layout
+
+\begin_layout Standard
+While we have demonstrated that our software 
+\emph on
+can
+\emph default
+ be used to obtain high-quality reconstructions, we do not guarantee reconstruct
+ion quality in any general sense.
+ FreeCT_wFBP should not, under any circumstances, be used for diagnostic
+ or other clinical work.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+newpage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newpage
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Developer's Note
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Developer's-Note"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We have done our best to write a software package that is easy to use 
+\emph on
+and 
+\emph default
+easy to understand, however it is unlikely that users will get satisfactory
+ results without some baseline familiarity with CT reconstruction.
+ Analytic CT reconstruction, while relatively simple in concept, is in practice
+ a complex and highly-sensitive process.
+ In some parameters, seemingly miniscule errors can introduce systemic problems
+ that can dramatically reduce or destroy image quality.
+ We highly recommend reading the publications referenced in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Introduction"
+
+\end_inset
+
+ prior to learning to use FreeCT_wFBP.
+ This will help users become familiar with the necessary parameter inputs
+ and potential complications that can be experienced with the software.
+ 
+\end_layout
+
+\begin_layout Standard
+Similarly, a user must also be familiar with the geometry of the system
+ from which they are attempting to reconstruct data.
+ This includes, but is not limited to things such as detector spacing and/or
+ fan angle increment, gantry geometries, tube anode angle, and other, often
+ proprietary, information.
+ For clinical scanners, this data sometimes is available publicly via the
+ internet, or must be obtained through agreements with a manufacturer.
+ Knowledge of 3rd generation CT scanners can also be of assistance in deducing
+ or deriving some of these parameters.
+ We've found that we just sometimes have to experiment to get optimal results.
+\end_layout
+
+\begin_layout Standard
+If you experience trouble with the software please don't hesitate to contact
+ us at 
+\series bold
+freect.project@gmail.com
+\series default
+.
+ It is through user feedback that FreeCT_wFBP will improve.
+ We will make every effort to support the software from a 
+\begin_inset Quotes eld
+\end_inset
+
+quality control
+\begin_inset Quotes erd
+\end_inset
+
+ standpoint (bug fixes, instructions on software installation and use, etc.);
+ we cannot guarantee that we will be able to support every request for assistanc
+e in solving reconstruction quality issues since there's just too darn many
+ things that can cause problems and only one FreeCT development team! The
+ exception to this is with the samples provided via the FreeCT website.
+\end_layout
+
+\begin_layout Standard
+Thanks for your interest in FreeCT and happy reconstructing!
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename FreeCTSmiley.png
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+newpage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Introduction"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+FreeCT_wFBP grew out of a need for fast, customizable diagnostic CT reconstructi
+on software.
+ We have striven to make the code easy to read, use, and modify with the
+ intent of facilitating education and research.
+ It is an implementation of the reconstruction methods outlined in:
+\end_layout
+
+\begin_layout Itemize
+K.
+ Stierstorfer, A.
+ Rauscher, J.
+ Boese, H.
+ Bruder, S.
+ Schaller, and T.
+ Flohr, “Weighted FBP—a simple approximate 3D FBP algorithm for multislice
+ spiral CT with good dose usage for arbitrary pitch,” Phys.
+ Med.
+ Biol., vol.
+ 49, no.
+ 11, pp.
+ 2209–2218, Jun.
+ 2004.
+\end_layout
+
+\begin_layout Itemize
+T.
+ G.
+ Flohr, K.
+ Stierstorfer, S.
+ Ulzheimer, H.
+ Bruder, a N.
+ Primak, and C.
+ H.
+ McCollough, “Image reconstruction and image quality evaluation for a 64-slice
+ CT scanner with z-flying focal spot.,” Med.
+ Phys., vol.
+ 32, no.
+ 8, pp.
+ 2536–2547, 2005.
+\end_layout
+
+\begin_layout Standard
+An outline and validation of FreeCT_wFBP has been published (submitted:
+ 10/25/2015, under review as of 10/29/2015) as a technical note in Medical
+ Physics:
+\end_layout
+
+\begin_layout Itemize
+(Citation will be provided if/when accepted)
+\end_layout
+
+\begin_layout Standard
+FreeCT_wFBP is currently most easily used under the Ubuntu distribution
+ of GNU/Linux, however all other Linux distributions should work as well
+ but will require a more manual approach to building and installing the
+ software (i.e.
+ utilizing the provided makefiles instead of the install script).
+ 
+\end_layout
+
+\begin_layout Section
+Quick Start Guide (Ubuntu/Debian)
+\end_layout
+
+\begin_layout Standard
+This is the default, recommended installation.
+ It requires root privileges (i.e.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+sudo
+\begin_inset Quotes erd
+\end_inset
+
+) to work without modification, however it is most likely to produce desired
+ results.
+\end_layout
+
+\begin_layout Standard
+These instructions are only valid for systems running Ubuntu/Debian.
+ Although it is likely that much of the installation script will work on
+ other systems, we cannot guarantee that everything will work without modificati
+on.
+\end_layout
+
+\begin_layout Paragraph
+Download and install the CUDA toolkit (and driver)
+\end_layout
+
+\begin_layout Standard
+Download and install the CUDA toolkit 6.5 (and driver if using a GPU for
+ reconstruction) from:
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+\begin_inset CommandInset href
+LatexCommand href
+target "https://developer.nvidia.com/cuda-toolkit-65"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+then follow the instructions for configuring your linux environment found
+ here (adjusting any version numbers as needed): 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+\begin_inset CommandInset href
+LatexCommand href
+target "http://docs.nvidia.com/cuda/cuda-getting-started-guide-for-linux/#environment-setup"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+See section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Get-the-CUDA"
+
+\end_inset
+
+ for more information about permanently configuring your environment for
+ CUDA.
+ 
+\end_layout
+
+\begin_layout Paragraph
+Download and run the fct_install script
+\end_layout
+
+\begin_layout Standard
+Download the desired 
+\begin_inset Quotes eld
+\end_inset
+
+fct_install_ubuntu
+\begin_inset Quotes erd
+\end_inset
+
+ script from the FreeCT website.
+ Ensure that the script is executable with the following command: 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Downloads/$ chmod +x fct_install_ubuntu
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Run the script with:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Downloads/$ ./fct_install_ubuntu
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\series bold
+Note that you should 
+\emph on
+not
+\emph default
+ call the script with 
+\begin_inset Quotes eld
+\end_inset
+
+sudo
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+; you will be prompted when the script requires root permissions.
+\end_layout
+
+\begin_layout Paragraph
+(Optional) Download and run the samples
+\end_layout
+
+\begin_layout Standard
+It is highly recommended that you download and install the samples from
+ the website.
+ Samples include all of the raw projection data used in the FreeCT Medical
+ Physics publication, as well as the parameter files required for reconstruction.
+ This will allow you to familiarize yourself with the structure of FreeCT_wFBP's
+ parameter files and command line calls, without the burden of configuring
+ everything for yourself.
+ 
+\end_layout
+
+\begin_layout Standard
+This subsection will be updated with a step by step guide on downloading
+ and running samples.
+\end_layout
+
+\begin_layout Section
+Building the software manually from source
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Building-the-software"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If the install script is not cooperating with your system, or if you are
+ using a distribution other than Ubuntu or Debian (or a derivative thereof),
+ it's likely the the software will still work, you just need a more manual
+ approach to compiling.
+ Please note that all of the steps below (with the exception of the CUDA
+ Toolkit installation) are performed automatically by the installation script.
+ We highly encourage users to take advantage of it, if possible.
+\end_layout
+
+\begin_layout Subsection
+Get the CUDA Toolkit
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Get-the-CUDA"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+First, ensure that you have downloaded and installed the CUDA toolkit (https://d
+eveloper.nvidia.com/cuda-downloads).
+ It is not necessary to have installed the CUDA driver to build the software,
+ however if you wish to run FreeCT_wFBP on your NVIDIA GPU, the corresponding
+ CUDA driver is required.
+ You will likely need to add the follwing to your ~/.bashrc file (google
+ 
+\begin_inset Quotes eld
+\end_inset
+
+editing bashrc
+\begin_inset Quotes erd
+\end_inset
+
+ if you are unfamiliar with this file):
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+export PATH=/usr/local/cuda/bin:${PATH}
+\end_layout
+
+\begin_layout Plain Layout
+
+export MANPATH=/usr/local/cuda/man:${MANPATH}
+\end_layout
+
+\begin_layout Plain Layout
+
+if [[ "
+\backslash
+x${LD_LIBRARY_PATH}" != "" ]]
+\end_layout
+
+\begin_layout Plain Layout
+
+then
+\end_layout
+
+\begin_layout Plain Layout
+
+	export LD_LIBRARY_PATH=
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	  /usr/local/cuda/lib64:
+\backslash
+${LD_LIBRARY_PATH}
+\end_layout
+
+\begin_layout Plain Layout
+
+else
+\end_layout
+
+\begin_layout Plain Layout
+
+	export LD_LIBRARY_PATH=/usr/local/cuda/lib64
+\end_layout
+
+\begin_layout Plain Layout
+
+fi
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Get FFTW3 development libraries
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Get-FFTW3-development"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The best way to install the development libraries is via your package manager.
+ Under Ubuntu, this is done with the following command:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~$ sudo apt-get install libfftw3-dev
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Unfortunately, the fftw3.h header file has a typedef statement that doesn't
+ directly support the CUDA compiler.
+ Fortunately it's a very simple fix.
+ We have provided a copy of the patched header file with the source code
+ which is available at: https://github.com/FreeCT/FreeCT_WFBP/blob/master/resourc
+es/patches/fftw3.h.
+ To patch the header with the FreeCT-provided file use the following command
+ (type in as one line, we have broken it up here for readability):
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~$ sudo wget -O /usr/include/fftw3.h 
+\end_layout
+
+\begin_layout Plain Layout
+
+  https://github.com/FreeCT/FreeCT_WFBP/blob/master/resources/patches/fftw3.h
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If you wish to edit the file yourself, we are changing line 362 (may vary
+ slightly) from:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+&& !(defined(__ICC) || defined(__INTEL_COMPILER)) 
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+to 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+&& !(defined(__ICC) || defined(__INTEL_COMPILER) || defined(__CUDACC__))
+ 
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that you will need to launch your editor using 
+\begin_inset Quotes eld
+\end_inset
+
+sudo
+\begin_inset Quotes erd
+\end_inset
+
+ if editing the line manually.
+\end_layout
+
+\begin_layout Subsection
+Get the source code
+\end_layout
+
+\begin_layout Standard
+You will first need the FreeCT_Reader source code as this is where the code
+ is held to read raw data files (this piece of software is kept separate
+ from the rest since it is licensed differently).
+ This can be downloaded from can be downloaded as a zip file from the GitHub
+ project page (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:The-GitHub-Repository"
+
+\end_inset
+
+), or using wget:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+wget https://github.com/FreeCT/FreeCT_Reader/archive/master.zip
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The source code for FreeCT_wFBP can be downloaded as a zip file from the
+ GitHub project page (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:The-GitHub-Repository"
+
+\end_inset
+
+), or using wget:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+wget https://github.com/FreeCT/FreeCT_WFBP/archive/master.zip
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Go ahead and extract it to the directory of your choosing.
+\end_layout
+
+\begin_layout Subsection
+Building and installing the reader library
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Building-and-installing-reader"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Prior to building FreeCT_wFBP, you will need the reader library (and correspondi
+ng headers) installed on your system path.
+ Once you have the source code downloaded, open a terminal window and navigate
+ to the FreeCT_Reader project directory and run the 
+\begin_inset Quotes eld
+\end_inset
+
+make
+\begin_inset Quotes erd
+\end_inset
+
+ command.
+ For example, if we have stored the code in ~/Code/FreeCT_Reader:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~$ cd ~/Code/FreeCT_Reader/ 
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_Reader$ make
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If everything is configured properly, then your output from the 
+\begin_inset Quotes eld
+\end_inset
+
+make
+\begin_inset Quotes erd
+\end_inset
+
+ command should look something like the following:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily
+\backslash
+footnotesize,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_Reader$ make
+\end_layout
+
+\begin_layout Plain Layout
+
+mkdir -p src/obj 
+\end_layout
+
+\begin_layout Plain Layout
+
+make -C src ../libfct_read.a 
+\end_layout
+
+\begin_layout Plain Layout
+
+make[1]: Entering directory `/home/john/Code/FreeCT_Reader/src' 
+\end_layout
+
+\begin_layout Plain Layout
+
+g++ -g -c -o obj/binary.o binary.c 
+\end_layout
+
+\begin_layout Plain Layout
+
+g++ -g -c -o obj/ctd.o ctd.c 
+\end_layout
+
+\begin_layout Plain Layout
+
+g++ -g -c -o obj/dicom.o dicom.c 
+\end_layout
+
+\begin_layout Plain Layout
+
+g++ -g -c -o obj/ptr.o ptr.c 
+\end_layout
+
+\begin_layout Plain Layout
+
+g++ -g -c -o obj/siemens_ima.o siemens_ima.c cd obj && ar rcs ../../libfct_read.a
+ *.o 
+\end_layout
+
+\begin_layout Plain Layout
+
+make[1]: Leaving directory `/home/john/Code/FreeCT_Reader/src' 
+\end_layout
+
+\begin_layout Plain Layout
+
+mkdir -p build 
+\end_layout
+
+\begin_layout Plain Layout
+
+cp include/* build/ 
+\end_layout
+
+\begin_layout Plain Layout
+
+cp libfct_read.a build/ 
+\end_layout
+
+\begin_layout Plain Layout
+
+rm -f libfct_read.a 
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_Reader$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If the code has built properly, a directly called 
+\begin_inset Quotes eld
+\end_inset
+
+build
+\begin_inset Quotes erd
+\end_inset
+
+ will have been created.
+ Inside there should be a file called 
+\begin_inset Quotes eld
+\end_inset
+
+libfct_read.a
+\begin_inset Quotes erd
+\end_inset
+
+ and several C header files (*.h).
+ By default, the library is installed in /usr/lib/ and the headers are placed
+ in /usr/include/fct/ however this will require root/sudo permissions.
+ This is the recommended way to install this library and should only be
+ done differently if users understand the linux compile toolchain fairly
+ well.
+ Please see 
+\begin_inset Quotes eld
+\end_inset
+
+troubleshooting
+\begin_inset Quotes erd
+\end_inset
+
+ at the end of this section if you do not have root permissions or have
+ access to an administrator.
+\end_layout
+
+\begin_layout Standard
+To install the libary type:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT
+\backslash
+_Reader/$ sudo make install
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Enter your administrator password when prompted.
+ You should see the following output if the library has successfully installed:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+mkdir -p /usr/include/fct 
+\end_layout
+
+\begin_layout Plain Layout
+
+mkdir -p /usr/include/fct/include/ 
+\end_layout
+
+\begin_layout Plain Layout
+
+cp build/libfct
+\backslash
+_read.a /usr/lib/ 
+\end_layout
+
+\begin_layout Plain Layout
+
+mv build/fct
+\backslash
+_read.h /usr/include/fct/ 
+\end_layout
+
+\begin_layout Plain Layout
+
+cp build/*.h /usr/include/fct/include/ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Building and installing FreeCT_wFBP
+\end_layout
+
+\begin_layout Standard
+Building and installed the wFBP source code is a very similar process to
+ the reader source code.
+ First, navigate to the FreeCT_wFBP source directory and run the 
+\begin_inset Quotes eld
+\end_inset
+
+make
+\begin_inset Quotes erd
+\end_inset
+
+ command:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily
+\backslash
+tiny,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_wFBP$ make
+\end_layout
+
+\begin_layout Plain Layout
+
+make -C src ../test 
+\end_layout
+
+\begin_layout Plain Layout
+
+make[1]: Entering directory `/home/user/Code/FreeCT_wFBP/src' 
+\end_layout
+
+\begin_layout Plain Layout
+
+nvcc -I../include/ -I/home/user/Public/reader_cuda/ -L/home/user/Public/reader_cud
+a/ -g -c -o obj/main.o main.cu 
+\end_layout
+
+\begin_layout Plain Layout
+
+nvcc -I../include/ -I/home/user/Public/reader_cuda/ -L/home/user/Public/reader_cud
+a/ -g -c -o obj/setup.o setup.cu 
+\end_layout
+
+\begin_layout Plain Layout
+
+nvcc -I../include/ -I/home/user/Public/reader_cuda/ -L/home/user/Public/reader_cud
+a/ -g -c -o obj/interp.o interp.cu 
+\end_layout
+
+\begin_layout Plain Layout
+
+nvcc -I../include/ -I/home/user/Public/reader_cuda/ -L/home/user/Public/reader_cud
+a/ -g -c -o obj/rebin_filter.o rebin_filter.cu 
+\end_layout
+
+\begin_layout Plain Layout
+
+nvcc -I../include/ -I/home/user/Public/reader_cuda/ -L/home/user/Public/reader_cud
+a/ -g -c -o obj/rebin_filter_cpu.o rebin_filter_cpu.cu 
+\end_layout
+
+\begin_layout Plain Layout
+
+nvcc -I../include/ -I/home/user/Public/reader_cuda/ -L/home/user/Public/reader_cud
+a/ -g -c -o obj/backproject.o backproject.cu 
+\end_layout
+
+\begin_layout Plain Layout
+
+nvcc -I../include/ -I/home/user/Public/reader_cuda/ -L/home/user/Public/reader_cud
+a/ -g -c -o obj/backproject_cpu.o backproject_cpu.cu 
+\end_layout
+
+\begin_layout Plain Layout
+
+(cd obj && nvcc -L/home/user/Public/reader_cuda/ -o ../../test /home/user/Public/rea
+der_cuda/read_raw_file.o *.o -lfftw3) 
+\end_layout
+
+\begin_layout Plain Layout
+
+make[1]: Leaving directory `/home/user/Code/FreeCT_wFBP/src'
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_wFBP$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If the compile process has worked properly, you should end up with an executable
+ file called 
+\begin_inset Quotes eld
+\end_inset
+
+FreeCT_wFBP
+\begin_inset Quotes erd
+\end_inset
+
+ in the source directory.
+ 
+\end_layout
+
+\begin_layout Standard
+While FreeCT_wFBP can now be used in this directory, we recommend using
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+install
+\begin_inset Quotes erd
+\end_inset
+
+ make target to install FreeCT_wFBP system-wide, and create a bash run script
+ to call FreeCT_wFBP from any location with one command.
+ Run the 
+\begin_inset Quotes eld
+\end_inset
+
+make install
+\begin_inset Quotes erd
+\end_inset
+
+ command as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_wFBP$ sudo make install
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The default installation directory is 
+\begin_inset Quotes eld
+\end_inset
+
+/usr/local/FreeCT/FreeCT_WFBP/
+\begin_inset Quotes erd
+\end_inset
+
+ however writing to this directory will require root privelges (i.e.
+ the use of 
+\begin_inset Quotes eld
+\end_inset
+
+sudo
+\begin_inset Quotes erd
+\end_inset
+
+ in the command).
+ This is perhaps not ideal for all users in which case the INSTALL_PATH
+ environment variable should be changed at the beginning of the makefile
+ to where the user wants.
+ If you do not have access to an administrator account, we recommend changing
+ line 1 of the makefile to (substituting your system user name for 
+\begin_inset Quotes eld
+\end_inset
+
+username
+\begin_inset Quotes erd
+\end_inset
+
+):
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+INSTALL_PATH?=/home/username/Applications/
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+and changing line 2 to:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+SCRIPT_PATH?=/home/username/bin/
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The user will have to ensure that their $PATH variable contains 
+\begin_inset Quotes eld
+\end_inset
+
+/home/username/bin/
+\begin_inset Quotes erd
+\end_inset
+
+ in order to use the script generated by the makefile a general linux command.
+\end_layout
+
+\begin_layout Subsection
+Compiling and Installation Troubleshooting
+\end_layout
+
+\begin_layout Paragraph
+Code will not compile
+\end_layout
+
+\begin_layout Standard
+First, have you installed and properly configured the CUDA toolkit, including
+ configuring the system paths as described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Get-the-CUDA"
+
+\end_inset
+
+? We may sound like a broken record, but this is an essential step.
+ You may need to restart your system after installation to ensure that you
+ are using the newly installed driver.
+\end_layout
+
+\begin_layout Standard
+Second, have you installed 
+\series bold
+and patched
+\series default
+ libfftw3-dev? If not, please refer back to section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Get-FFTW3-development"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Finally, have you compiled and installed the FreeCT_Reader library? If not,
+ please refer back to section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Building-and-installing-reader"
+
+\end_inset
+
+ above.
+ 
+\series bold
+If you modified the installation location of the library
+\series default
+ (not recommended), you will need to either (1) modify the FreeCT_wFBP source
+ makefile (located in FreeCT_wFBP/src/) library arguments or (2) add the
+ reader library/header install locations to your compiler's library and
+ include search paths.
+ 
+\end_layout
+
+\begin_layout Standard
+Lots of issues can cause code to not compile, however we have found most
+ problems arise from linking external libraries.
+ The best advice we can give is to look carefully at error messages coming
+ out of the compiler.
+ When the problem lies in linking an external library, often someone else
+ has experienced them before in which case Google is your best resource
+ for working out these issues.
+ 
+\end_layout
+
+\begin_layout Paragraph
+Code will not install
+\end_layout
+
+\begin_layout Standard
+First, ensure that you are running 
+\begin_inset Quotes eld
+\end_inset
+
+make install
+\begin_inset Quotes erd
+\end_inset
+
+ with root permissions, or have configured your paths to the appropriate,
+ non-system directories (this is done by editing the makefile in the top-level
+ source directory, FreeCT_WFBP/makefile).
+ 
+\end_layout
+
+\begin_layout Paragraph
+Code has installed but will not run
+\end_layout
+
+\begin_layout Standard
+Ensure that the directory to which you installed your run script is on the
+ $PATH variable of your shell, and that the script correctly points to the
+ installation directory.
+ 
+\end_layout
+
+\begin_layout Paragraph
+Other issues?
+\end_layout
+
+\begin_layout Standard
+If you are following the instructions above on a Linux system and still
+ experiencing problems, please contact us at freect.project@gmail.com with
+ as much information as possible about the error you are experiencing.
+ We want FreeCT_wFBP to be as smooth of an experience as possible and will
+ do our best to help you work through any issues.
+\end_layout
+
+\begin_layout Section
+Using FreeCT_wFBP
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Using-CTBangBang"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+While FreeCT_wFBP is relatively simple when considered against other reconstruct
+ion software, it will still appear somewhat complex to users new to the
+ reconstruction process.
+ We encourage users to 
+\emph on
+read this entire section before attempting any non-sample reconstructions
+\emph default
+ to ensure a base level of familiarity with how FreeCT_wFBP expects data
+ and how FreeCT_wFBP is configured and called.
+\end_layout
+
+\begin_layout Standard
+It will help immensely if the user is familiar with standard descriptors
+ of diagnostic CT geometry (see the references in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Introduction"
+
+\end_inset
+
+ for a good starting point).
+ 
+\end_layout
+
+\begin_layout Subsection
+Projection data storage format
+\end_layout
+
+\begin_layout Standard
+Modern diagnostic CT projection data can be thought of as a stack of two-dimensi
+onal images with dimensions 
+\begin_inset Formula $N_{channels}\times N_{rows}$
+\end_inset
+
+ each acquired at some tube angle.
+ We call each of these 
+\begin_inset Quotes eld
+\end_inset
+
+images
+\begin_inset Quotes erd
+\end_inset
+
+ a projection.
+ This results in a three-dimensional array of size 
+\begin_inset Formula $N_{channels}\times N_{rows}\times N_{projections}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Throughout FreeCT_wFBP, our projection data is stored in memory indexing
+ across channels first, then rows, then projections, however all arrays
+ are single dimensional.
+ Put another way, the channels are stored with stride 
+\begin_inset Formula $1$
+\end_inset
+
+, rows are stored with stride 
+\begin_inset Formula $N_{channels}$
+\end_inset
+
+ and projections are stored with stride 
+\begin_inset Formula $N_{channels}\times N_{rows}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+For example, if we wish to fetch the projection pixel from channel 
+\begin_inset Formula $i$
+\end_inset
+
+, row 
+\begin_inset Formula $j$
+\end_inset
+
+, and projection 
+\begin_inset Formula $k$
+\end_inset
+
+, the array index for these coordinates would be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+index(i,j,k)=\left(N_{channels}*N_{rows}\right)*k+\left(N_{channels}\right)*j+i
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and we would then reference our array with
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+raw\_array[index(i,j,k)]=projection\; ray\; value
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is important to understand this concept, since this is also how FreeCT_wFBP
+ expects projection data to be stored.
+\end_layout
+
+\begin_layout Standard
+FreeCT_wFBP currently offers support for projection data stored as binary
+ files of floating point data, as well as an open format raw data file type
+ from the Mayo Clinic.
+ See section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Open-format-DICOM"
+
+\end_inset
+
+ for more details on this data format.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Binary files
+\end_layout
+
+\begin_layout Standard
+Binary files should be stored on disk indexing first across channels, then
+ rows, then projections, as described above.
+ 
+\series bold
+All data should be written as single-precision float data
+\series default
+.
+ The system on which FreeCT_wFBP was developed utilizes the little-endian
+ convention and while there is no explicit endianness specified in the code,
+ a user should make sure that the endianness of the data matches the endianness
+ of the system used to compile FreeCT_wFBP.
+\end_layout
+
+\begin_layout Standard
+If you're writing binary data from MATLAB, pay close attention to the fact
+ that MATLAB uses column major indexing (i.e.
+ columns of an array are stored linearly in memory).
+ This means that your matrix in MATLAB would have dimensions 
+\begin_inset Formula $N_{channels}\times N_{rows}\times N_{projections}$
+\end_inset
+
+ and each projection when displayed would be a tall, thin image for current
+ diagnostic CT scanners.
+ See Appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appendix-A:-Saving"
+
+\end_inset
+
+ for more information about using MATLAB to manipulate and then save raw
+ data.
+\end_layout
+
+\begin_layout Subsubsection
+Open format DICOM raw data 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Open-format-DICOM"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+FreeCT_Reader has implemented a basic version of this reader, however through
+ correspondence with the Mayo Clinic group, we have learned that the 
+\begin_inset Quotes eld
+\end_inset
+
+standard
+\begin_inset Quotes erd
+\end_inset
+
+ has recently changed.
+ A journal article clarifying the standard has been submitted and we will
+ update the reader function to reflect these changes upon its publication.
+\end_layout
+
+\begin_layout Subsubsection
+Proprietary data formats
+\end_layout
+
+\begin_layout Standard
+FreeCT_WFBP and FreeCT_Reader do not support any proprietary data formats.
+ We encourage users to utlitilize the open-format DICOM-based standard for
+ raw data or binary file formats as described above.
+\end_layout
+
+\begin_layout Subsection
+PRM files
+\end_layout
+
+\begin_layout Standard
+PRM files (short for parameter files) are how the user configures a reconstructi
+on and the only argument that is passed to the FreeCT_wFBP executable aside
+ from program execution options.
+ At this point in the FreeCT_wFBP project, it is important that a user understan
+d all aspects of the PRM files since they must be manually created for each
+ reconstruction, however in the future we hope to have a more automated
+ method of creating them.
+\end_layout
+
+\begin_layout Standard
+A standard PRM file is a carefully formatted plain text file and will look
+ like the following:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+% Sample PRM file for reconstruction with FreeCT
+\backslash
+_wFBP
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+RawDataDir:	/home/user/raw_data/ 
+\end_layout
+
+\begin_layout Plain Layout
+
+RawDataFile:	my_test_data.bin 
+\end_layout
+
+\begin_layout Plain Layout
+
+Nrows:		16 
+\end_layout
+
+\begin_layout Plain Layout
+
+CollSlicewidth:	1.2 
+\end_layout
+
+\begin_layout Plain Layout
+
+StartPos:	245.0 
+\end_layout
+
+\begin_layout Plain Layout
+
+EndPos:		200.0 
+\end_layout
+
+\begin_layout Plain Layout
+
+SliceThickness:	1.2 
+\end_layout
+
+\begin_layout Plain Layout
+
+TubeStartAngle:	180.0
+\end_layout
+
+\begin_layout Plain Layout
+
+PitchValue:	19.2
+\end_layout
+
+\begin_layout Plain Layout
+
+AcqFOV:		500.0 
+\end_layout
+
+\begin_layout Plain Layout
+
+ReconFOV:	250.0 
+\end_layout
+
+\begin_layout Plain Layout
+
+ReconKernel:	3 % Sharp kernel
+\end_layout
+
+\begin_layout Plain Layout
+
+Readings:	60000 
+\end_layout
+
+\begin_layout Plain Layout
+
+Xorigin:	0.0 
+\end_layout
+
+\begin_layout Plain Layout
+
+Yorigin:	0.0 
+\end_layout
+
+\begin_layout Plain Layout
+
+Zffs:		0 
+\end_layout
+
+\begin_layout Plain Layout
+
+Phiffs:		1 
+\end_layout
+
+\begin_layout Plain Layout
+
+Scanner:	1 
+\end_layout
+
+\begin_layout Plain Layout
+
+FileType:	1 
+\end_layout
+
+\begin_layout Plain Layout
+
+FileSubType:	0
+\end_layout
+
+\begin_layout Plain Layout
+
+RawOffset:	0 
+\end_layout
+
+\begin_layout Plain Layout
+
+Nx:		512 
+\end_layout
+
+\begin_layout Plain Layout
+
+Ny:		512
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Some important things to note about PRM file structure:
+\end_layout
+
+\begin_layout Itemize
+Each parameter should be separated by a newline character,
+\end_layout
+
+\begin_layout Itemize
+Each line takes the form 
+\begin_inset Quotes eld
+\end_inset
+
+ParameterIdentifier: 
+\backslash
+tab(s) ParameterValue
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+All whitespace between the identifier and its value should be tabs or spaces.
+ Multiple tab characters are OK between a parameter identifier and its value.
+\end_layout
+
+\begin_layout Itemize
+Parameter files are commentable with 
+\begin_inset Quotes eld
+\end_inset
+
+%
+\begin_inset Quotes erd
+\end_inset
+
+ in the manner shown above.
+ Do not place comments before or in between parameter/value specifications.
+ They should be placed on their own lines, or at the end of a line.
+\end_layout
+
+\begin_layout Itemize
+Parameter identifiers are case-sensitive, and
+\end_layout
+
+\begin_layout Itemize
+FreeCT_wFBP expects all physical distance measurements to be in millimeters.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+interfootnotelinepenalty=10000
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+raggedbottom
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+rowcolors{2}{gray!25}{white}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+small
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{$l^l^p{3.5in}} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+toprule
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+rowstyle{
+\backslash
+bfseries}
+\end_layout
+
+\begin_layout Plain Layout
+
+Parameter & Sample value(s) & Description 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+midrule 
+\end_layout
+
+\begin_layout Plain Layout
+
+RawDataDir:             & /home/user/raw
+\backslash
+_data
+\backslash
+_dir/         & Full path to directory containing raw projection data.
+  Ensure that the path ends in the file separator for your system.
+                              
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+RawDataFile:            & n
+\backslash
+_ffs.IMA                         & Case-sensitive file name of raw data file
+ 																										    
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+Nrows:                  & 16                                 & Number of
+ rows in the collimation value (e.g.
+ if collimation is $16 
+\backslash
+times 1.2 mm $, $64 
+\backslash
+times 0.6 mm$ , Nrows is $16$ and $64$ respectively)        
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+CollSlicewidth:         & 1.2                                & The second
+ term of your collimation, in millimeters.
+ Note this is collimated slice width in your acquisition, not reconstruction
+ slice thickness.
+     
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+StartPos:               & 250                                & Location
+ of the first slice to be reconstructed.
+ 
+\backslash
+footnotemark                                                           
+                             
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+EndPos:                 & 265                                & Location
+ of final slice to be reconstructed.
+\backslash
+footnotemark[2]  May be lower, higher or equal to the start position.
+                                    
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+SliceThickness:         & 5.0                                & Reconstructed
+ slice thickness and, currently, reconstruction pitch                  
+              													
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+TubeStartAngle:         & 180.0                              & Acquisition
+ angle, in degrees, of the first projection in the raw data.
+ This parameter is ignored for file formats that contain tube angle information
+ (i.e.
+ we read this paramter when using binary files, but not the DICOM raw data
+ type.)
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+PitchValue:             & 19.2                               & Table travel
+ per gantry rotation.
+ 																													
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+AcqFOV:                 & 500.0                              &  Acquisition
+ field of view.
+ For most clinical scanners this is 500 mm.
+ 											   								
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+ReconFOV:               & 250.0                              & Reconstruction
+ field of view.
+  Reconstruction grid height and width, centered on Xorigin and Yorigin
+ (see below).									 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+ReconKernel:            & -1, 1, 2, or 3                     & Reconstruction
+ kernel selection.
+  Current offerings are (-1) experimental kernel, (1) smooth (2) medium
+ (3) sharp/ramp.
+ Offerings will be expanded in the future.
+ 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+Readings:               & 31456                              & Total number
+ of projections contained in the raw data file.
+  This is to ensure that we don't try and reconstruct outside of the available
+ data.
+ 	  
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Xorigin:                & 0.0, -12.5, 30.0, etc.
+             & Spatial location of the horizontal reconstruction center
+ in millimeters.
+  Use for zoned reconstructions on objects away from the center of the scan.
+  Should be less than ReconFOV/2.
+  
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Yorigin:                & 0.0, -12.5, 30.0 , etc.
+            & Spatial location of the vertical reconstruction center in
+ millimeters.
+  Should also be less than ReconFOV/2.
+ 									    
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Zffs:                   & 0, or 1                            & Flag to tell
+ FreeCT
+\backslash
+_wFBP if scan was acquired using Z flying focal spot.
+ 0 means no z ffs was used, 1 means it was used.		   				  
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Phiffs:                 & 0, or 1                            & Flag to tell
+ FreeCT
+\backslash
+_wFBP if scan was acquired using Phi flying focal spot.
+  0 means phi ffs was not used, 1 means it was used.
+        				
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Scanner:                & 1,2, filename, full file path      & 1, and 2
+ correspond to hardcoded scanner geometries for the Siemens Definition AS,
+ and Sensation 64 respectively.
+  If user passes a filename, FreeCT
+\backslash
+_wFBP will fetch the scanner geometry from FreeCT
+\backslash
+_wFBP/resources/scanners/filename.
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+FileType:               & 0,1,2, or 3                        & Type of raw
+ data we are reading.
+  (0) Binary data (1) Unsupported proprietary format 1 (2) Unsupported proprieta
+ry format 2 (3) Unsupported proprietary format 3, and (4) DICOM open-format.
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+FileSubtype:            & 0                                  & Parameter
+ reserved for future use.
+ Leave set to 0.
+ 																								   
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+RawOffset:              & 23564                              & Byte offset
+ to projection data.
+ Only necessary if a binary file type contains a fixed header.													
+     
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Nx:                     & 512                                & Width of
+ the reconstruction volume in pixels.
+  Should be a multiple of 32.
+ Standard clinical reconstructions are 512x512.
+                             
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Ny:                     & 512                                & Height of
+ the reconstruction volume in pixels.
+  Should be a multiple of 32.
+  Standard clinical recosntructions are 512x512.
+                           
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+bottomrule 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+caption{Summary of parameter identifiers and their values for FreeCT
+\backslash
+_wFBP v0.0.2}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+label{tab:summary-parameter-identifiers}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{Note that for non-binary files, we use the the table positions
+ specified in the raw data file.
+  For binary files, we assume the first projection occurs at table position
+ 0.0 and the final projection occurs at table position $
+\backslash
+frac{N_{proj}}{N_{r}} z_{rot}$ where $N_{proj}$ is the total number of projectio
+ns in the scan, $N_{r}$ is the number of projections per rotation, and $z_{rot}$
+ is the distance (in millimeters) the table moves per rotation.}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Some 
+\begin_inset Quotes eld
+\end_inset
+
+sanity checking
+\begin_inset Quotes erd
+\end_inset
+
+ is performed to make sure the software was able to configure settings properly
+ from the given input file.
+ If FreeCT finds a parameter out of a reasonable range (e.g.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Nrows
+\begin_inset Quotes erd
+\end_inset
+
+ is zero or negative), it will not run.
+ This usually indicates a parameter that was unable to be properly parsed.
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{tab:summary-parameter-identifiers}
+\end_layout
+
+\end_inset
+
+ lists each parameter and gives a sample value and explanation of the parameter.
+ All parameters listed in table 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{tab:summary-parameter-identifiers}
+\end_layout
+
+\end_inset
+
+ are required, however they may appear in any order in the PRM file.
+ Several sample PRM files and raw data files are available on the FreeCT
+ website.
+\end_layout
+
+\begin_layout Subsection
+Running a reconstruction
+\end_layout
+
+\begin_layout Standard
+FreeCT_wFBP is run with the following command structure:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+fct_wfbp [options] input_prm_file
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So for example, to run the no flying focal spot sample provided on the FreeCT
+ website, the command is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_wFBP$ fct_wfbp samples/prms/n_ffs.prm
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Current options available to the user are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{black},commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+-v		Verbose mode.
+\end_layout
+
+\begin_layout Plain Layout
+
+-t		Testing mode.
+ Will write a number of *.ct_test files to 
+\end_layout
+
+\begin_layout Plain Layout
+
+		the desktop at key points in the reconstruction.
+ This is
+\end_layout
+
+\begin_layout Plain Layout
+
+		useful for debugging and diagnosing 
+\end_layout
+
+\begin_layout Plain Layout
+
+		reconstruction problems.
+ These are binary files of floats
+\end_layout
+
+\begin_layout Plain Layout
+
+		stored in the format described in section 5.
+\end_layout
+
+\begin_layout Plain Layout
+
+--timing	Timing mode will output timing information to stdout 
+\end_layout
+
+\begin_layout Plain Layout
+
+		during reconstruction.
+\end_layout
+
+\begin_layout Plain Layout
+
+--benchmark 	Saves hidden binary file of timing information for the 
+\end_layout
+
+\begin_layout Plain Layout
+
+		reconstruction to the desktop.
+  Works, but still under
+\end_layout
+
+\begin_layout Plain Layout
+
+		development.
+  Not recommended for use as of 10/28/2015.
+\end_layout
+
+\begin_layout Plain Layout
+
+--no-gpu	Runs FreeCT_wFBP entirely on the CPU.
+ If you do not have a
+\end_layout
+
+\begin_layout Plain Layout
+
+		GPU installed in your machine, or your GPU is not capable
+\end_layout
+
+\begin_layout Plain Layout
+
+		of running CUDA code, FreeCT_wFBP MUST be run 
+\end_layout
+
+\begin_layout Plain Layout
+
+		using this switch.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+--device=i 	Specify which CUDA device on which to run FreeCT_wFBP
+\end_layout
+
+\begin_layout Plain Layout
+
+		(not necessary for most uses).
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+To run the same no flying focal spot sample case with all options activated
+ (i.e.
+ verbose, testing, and no-gpu) the command would be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+user@node:~/Code/FreeCT_wFBP$ ./test -v -t --no-gpu samples/prms/n_ffs.prm
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We do NOT currently support the ability to mix switches (i.e.
+ ./test -vt --no-gpu prms/file.raw will not work since 
+\begin_inset Quotes eld
+\end_inset
+
+-vt
+\begin_inset Quotes erd
+\end_inset
+
+ is not a valid option).
+\end_layout
+
+\begin_layout Standard
+Reconstruction data is currently output to the desktop in two files: image_data.t
+xt and the value of 
+\begin_inset Quotes eld
+\end_inset
+
+RawDataFile:
+\begin_inset Quotes erd
+\end_inset
+
+ in your PRM file, with 
+\begin_inset Quotes eld
+\end_inset
+
+.img
+\begin_inset Quotes erd
+\end_inset
+
+ appended.
+ Thus, if you entered 
+\begin_inset Quotes eld
+\end_inset
+
+n_ffs.IMA
+\begin_inset Quotes erd
+\end_inset
+
+ for your raw data file, your output file will be 
+\begin_inset Quotes eld
+\end_inset
+
+n_ffs.IMA.img
+\begin_inset Quotes erd
+\end_inset
+
+ saved to the Desktop.
+ This is the primary reconstruction file containing only the slices requested
+ and in the order they were requested is the latter of the two (n_ffs.IMA.img
+ in our example).
+ Image_data.txt is more of a debugging file than something that should be
+ relied on for future releases.
+ FreeCT_wFBP reconstructs in volumes of 
+\begin_inset Formula $N_{x}\times N_{y}\times32$
+\end_inset
+
+ voxels for efficiency/gpu reasons, however depending on the configuration,
+ some of these slices may be thrown out in the final 
+\begin_inset Quotes eld
+\end_inset
+
+*.img
+\begin_inset Quotes erd
+\end_inset
+
+ file.
+ Image_data.txt records ALL of the slices reconstructed (i.e.
+ the number of slices will always be a multiple of 32), however not necessarily
+ in the correct order.
+ This can also be useful for debugging.
+\end_layout
+
+\begin_layout Subsection
+Scripting with FreeCT_wFBP
+\end_layout
+
+\begin_layout Standard
+There are a myriad of different possibilities for scripting with FreeCT_wFBP.
+ We have used FreeCT_wFBP extensively with MATLAB, and Bash.
+ Any language that provides an API for system calls should work well with
+ FreeCT_wFBP.
+\end_layout
+
+\begin_layout Section
+Raw Data
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Raw-Data"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Raw data is a complex and difficult issue in diagnostic CT.
+ Assuming the user can access the raw data file, all manufacturers currently
+ use proprietary data formats that are often encoded in not-trivial ways.
+ Through agreements with manufacturers, several groups (including our own)
+ have worked to reverse engineer a very small subset of these data types
+ for use in our own research, however due to the proprietary nature of the
+ work, they are currently unavailable for release.
+\end_layout
+
+\begin_layout Standard
+There is an ongoing effort from the Mayo Clinic to develop a library of
+ freely available diagnostic CT projection data sets which will be stored
+ in an open-format raw data file type based on the DICOM standard.
+ Direct reading from this file-type is currently under development for FreeCT_wF
+BP and will be released in the near future as both part of the FreeCT_wFBP
+ package, as well as an independent C library for other use.
+ FreeCT_wFBP also supports the reading of raw projection data stored as
+ a binary file of float data.
+ More information on how data should be stored for reading can be found
+ in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Using-CTBangBang"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+The GitHub Repository
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:The-GitHub-Repository"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Users wishing to develop with the code may want to use Git.
+ The directory can also be cloned using Git (https://git-scm.com/):
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[language=bash,basicstyle=
+\backslash
+ttfamily,keywordstyle=
+\backslash
+color{blue}
+\backslash
+bfseries,commentstyle=
+\backslash
+color{red},backgroundcolor=
+\backslash
+color{lightgray}]
+\end_layout
+
+\begin_layout Plain Layout
+
+git clone git@github.com:FreeCT/FreeCT_WFBP.git
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Currently, all code can be found on Github at https://github.com/FreeCT/.
+ For both the FreeCT_Reader and FreeCT_wFBP repositories, there are three
+ main branches that are maintained:
+\end_layout
+
+\begin_layout Enumerate
+Master - Contains 
+\begin_inset Quotes eld
+\end_inset
+
+production
+\begin_inset Quotes erd
+\end_inset
+
+ code that should be almost entirely stable.
+ The goal is that this contains scientifically accurate code, that can be
+ reliably used for research.
+ This will be the best starting place for new users.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Develop - Contains mostly stable code, however will also contain new feature
+ additions, some experimental work, etc.
+ This is where you should go for the most recent developments in the code,
+ however without the headache of truly experimental code.
+ Most people interested in developing/forking FreeCT should work from this
+ branch.
+\end_layout
+
+\begin_layout Enumerate
+Nightly - Will contain work that is likely not suitable for all audiences.
+ It is largely just to sync work between computers.
+ This will truly have the latest updates, but may also contain modifications
+ to otherwise stable code for testing purposes.
+ No effort is made to ensure that this will run on anyone's computer.
+ This branch should be ignored by all but the most adventurous users.
+\end_layout
+
+\begin_layout Section
+Dependencies
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Dependencies"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One of the purposes in developing our own code was to remove the need for
+ large quantities of external libraries.
+ There are currently only two hard dependencies:
+\end_layout
+
+\begin_layout Enumerate
+The Nvidia CUDA toolkit (https://developer.nvidia.com/cuda-downloads) - The
+ CUDA toolkit is required to build the current version of FreeCT_wFBP, however
+ the code can be run exclusively on a CPU without the CUDA driver (more
+ information on this later).
+ We plan to provide a CPU-exclusive version in the future that can be compiled
+ with gcc.
+\end_layout
+
+\begin_layout Enumerate
+FFTW3 (http://www.fftw.org/) - FFTW is a C-based fourier transform library
+ utilized in the CPU filtering code.
+ It is available though most, if not all, linux package managers.
+ It can be built from source as well however paths will most likely need
+ to be corrected in the makefile.
+ 
+\end_layout
+
+\begin_layout Standard
+Furthermore, this code was developed under linux (Ubuntu 14.04 LTS) and relies
+ on several core unix 
+\begin_inset Quotes eld
+\end_inset
+
+includes.
+\begin_inset Quotes erd
+\end_inset
+
+ These should all be available on any POSIX-like or POSIX-compliant system
+ and are:
+\end_layout
+
+\begin_layout Enumerate
+sys/types.h
+\end_layout
+
+\begin_layout Enumerate
+pwd.h
+\end_layout
+
+\begin_layout Enumerate
+unistd.h
+\end_layout
+
+\begin_layout Enumerate
+math.h
+\end_layout
+
+\begin_layout Enumerate
+complex.h
+\end_layout
+
+\begin_layout Enumerate
+stdlib.h
+\end_layout
+
+\begin_layout Enumerate
+stdio.h
+\end_layout
+
+\begin_layout Enumerate
+cstdarg
+\end_layout
+
+\begin_layout Enumerate
+regex.h
+\end_layout
+
+\begin_layout Standard
+Note that sys/types.h, pwd.h, and unistd.h are used for path independence in
+ the compiled version of the code.
+ If these files are not available, hard coding of system paths (or another
+ method of obtaining paths) should allow the user to port the software to
+ any system.
+ 
+\end_layout
+
+\begin_layout Section
+Project Organization
+\end_layout
+
+\begin_layout Standard
+The project contains three main directories: src, include, and resources.
+\end_layout
+
+\begin_layout Itemize
+FreeCT_WFBP/src: contains the *.cu source files for the project.
+ This includes host code for the GPU-based functions, and any other CPU
+ code.
+\end_layout
+
+\begin_layout Itemize
+FreeCT_WFBP/include: contains C header files and CUDA header files.
+ C header files (*.h) are standard function prototypes and structure definitions.
+ CUDA header files (*.cuh) contain the GPU kernel code.
+ There is one C header file for every source file and one CUDA header file
+ for source files that contain GPU code (these files are rebin_filter.cu,
+ and backproject.cu with corresponding cuda headers rebin_filter.cuh and backproje
+ct.cuh).
+\end_layout
+
+\begin_layout Itemize
+FreeCT_WFBP/resources: contains static data files such as scanner geometries
+ and reconstruction kernels that are used in the reconstruction process.
+ No code used explicitly by the FreeCT_wFBP program lives here.
+\end_layout
+
+\begin_layout Itemize
+FreeCT_WFBP/doc: Contains the documentation for free CT, including this
+ document.
+\end_layout
+
+\begin_layout Standard
+Source files are broken up by reconstruction step performed.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+int main()
+\begin_inset Quotes erd
+\end_inset
+
+ function is contained in 
+\emph on
+src/main.cu
+\emph default
+ which then makes the calls to all other functions.
+ The flow of the code is as follows:
+\end_layout
+
+\begin_layout Enumerate
+Parse input file and configure scanner geometry and reconstruction parameters:
+ 
+\emph on
+include/recon_structs.h, include/setup.h, and src/setup.cu
+\end_layout
+
+\begin_layout Enumerate
+Extract raw data from file: 
+\emph on
+include/setup.h, include/setup.cu, 
+\emph default
+FreeCT_Reader (our library dedicated to reading CT projection data).
+\end_layout
+
+\begin_layout Enumerate
+Parallel rebinning: 
+\emph on
+include/rebin_filter.h, include/rebin_filter_cpu.h, include/rebin_filter.cuh,
+ src/rebin_filter.cu, and include/rebin_filter_cpu.cu
+\end_layout
+
+\begin_layout Enumerate
+Filtering: 
+\emph on
+include/rebin_filter.h, include/rebin_filter_cpu.h, include/rebin_filter.cuh,
+ src/rebin_filter.cu, and include/rebin_filter_cpu.cu
+\end_layout
+
+\begin_layout Enumerate
+Backprojection: 
+\emph on
+include/backproject.h, include/backproject.cuh, include/backproject_cpu.h,
+ src/backproject.cu, src/backproject_cpu.cu
+\end_layout
+
+\begin_layout Enumerate
+Write data to output file: 
+\emph on
+include/setup.h, src/setup.cu
+\end_layout
+
+\begin_layout Section
+Possible future developments paths
+\end_layout
+
+\begin_layout Standard
+The work listed here is work that we would like to do to grow FreeCT_wFBP,
+ for which however we do not have specific plans.
+ If you're potentially interested in developing for FreeCT, these would
+ be so great things to work on to have the best chances of getting your
+ code included in the project!
+\end_layout
+
+\begin_layout Standard
+General:
+\end_layout
+
+\begin_layout Itemize
+Speed, speed, speed! If you can get it running faster (while preserving
+ results of course), we'll ALWAYS take a look at your work.
+\end_layout
+
+\begin_layout Itemize
+Cross platform (other Linux/Unix, MacOS, Windows) implementation, perhaps
+ with libraries like Boost (http://www.boost.org/),
+\end_layout
+
+\begin_layout Itemize
+Multicore CPU implementation
+\end_layout
+
+\begin_layout Itemize
+Documentation improvements, or instructions for installing on other systems.
+\end_layout
+
+\begin_layout Standard
+Reconstruction kernels.
+ 
+\end_layout
+
+\begin_layout Itemize
+Let's get as many as we can, as similar to what is used clinically as is
+ possible!
+\end_layout
+
+\begin_layout Itemize
+On-the-fly calculation and saving for new scanner geometries.
+\end_layout
+
+\begin_layout Standard
+Multi-GPU work:
+\end_layout
+
+\begin_layout Itemize
+Multi-GPU implementation (i.e.
+ utilize mutliple GPUs for one reconstruction)
+\end_layout
+
+\begin_layout Itemize
+GPU 
+\begin_inset Quotes eld
+\end_inset
+
+job-scheduling
+\begin_inset Quotes erd
+\end_inset
+
+ (i.e.
+ run one reconstruction per GPU on a computer system with multiple GPUs).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newpage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Appendix A: Saving Projection Data from MATLAB to binary files for use with
+ FreeCT_wFBP 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Appendix-A:-Saving"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Under construction!
+\end_layout
+
+\end_body
+\end_document
