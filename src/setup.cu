@@ -231,6 +231,7 @@ struct ct_geom configure_ct_geom(struct recon_metadata *mr){
 	strcat(path,"/resources/scanners/");
 	strcat(path,mr->rp.scanner);
 	cg_file=fopen(path,"r");
+	printf("scanner: %i\n",scanner);
 	if (cg_file==NULL){
 	    // Finally, try it as a number for a hardcoded scanner 
 	    scanner=atoi(mr->rp.scanner);
@@ -438,6 +439,7 @@ void configure_reconstruction(struct recon_metadata *mr){
 	    for (int i=0;i<rp.n_readings;i++){
 		mr->tube_angles[i]=fmod(((360.0f/cg.n_proj_ffs)*i+rp.tube_start_angle),360.0f);
 		mr->table_positions[i]=((float)rp.n_readings/(float)cg.n_proj_ffs)*cg.z_rot-(float)i*cg.z_rot/(float)cg.n_proj_ffs;
+                //mr->table_positions[i]=(float)i*cg.z_rot/(float)cg.n_proj_ffs;
 	    }	
 	    break;}
     case 1:{; //DefinitionAS Raw
@@ -481,6 +483,9 @@ void configure_reconstruction(struct recon_metadata *mr){
     }
     fclose(raw_file);
 
+    printf("table_positions[0]: %f\n",mr->table_positions[0]);
+    printf("table_positions[-1]: %f\n",mr->table_positions[rp.n_readings-1]);
+
     /* --- Figure out how many and which projections to grab --- */
     int n_ffs=pow(2,rp.z_ffs)*pow(2,rp.phi_ffs);
     int n_slices_block=BLOCK_SLICES;
@@ -509,9 +514,14 @@ void configure_reconstruction(struct recon_metadata *mr){
     mr->ri.data_begin_pos = mr->table_positions[0];
     mr->ri.data_end_pos   = mr->table_positions[rp.n_readings-1];
     float projection_padding= cg.z_rot * (cg.n_proj_ffs/2+cg.add_projections_ffs+256)/cg.n_proj_ffs;
+
     float allowed_begin = mr->ri.data_begin_pos+array_direction*projection_padding;
     float allowed_end   = mr->ri.data_end_pos-array_direction*projection_padding;
-
+    printf("array_direction: %i\n",array_direction);
+    printf("projection_padding: %.2f\n",projection_padding);
+    printf("cg.z_rot: %.2f\n",cg.z_rot);
+    printf("cg.n_proj_turn: %i\n",cg.n_proj_turn);
+    printf("cg.add_projections_ffs: %i\n",cg.add_projections_ffs);
     mr->ri.allowed_begin = allowed_begin;
     mr->ri.allowed_end   = allowed_end;
 

@@ -4,9 +4,9 @@ CC=g++
 ODIR=obj
 
 IDIR_RECON=../include/
-INCLUDES=-I$(IDIR_RECON)
+INCLUDES=-I$(IDIR_RECON) -I/home/mmouchet/Software/FreeCT/FreeCT_Reader/install/include
 
-LIBS=-lfftw3 -lm -lfct_read
+LIBS=-L/home/mmouchet/Software/FreeCT/FreeCT_Reader/install/lib -lfftw3 -lm -lfct_read
 
 CFLAGS=$(INCLUDES) -g
 

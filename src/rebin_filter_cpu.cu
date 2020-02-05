@@ -653,19 +653,28 @@ void filter_cpu(float * row, float * filter, int N){
     // Create two new padded/manipulated vectors from our inputs into fftw complex arrays
     fftw_complex * R = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*M);
     memset(R,0,M*sizeof(fftw_complex));
-    for (int i=0;i<N;i++){
+    /*for (int i=0;i<N;i++){
 	R[i]=row[i];
+    }*/
+    for (int i=0; i<N ; i++){
+	memcpy(&R[i][0],row + i * N, N);
     }
 
     fftw_complex * F=(fftw_complex*)fftw_malloc(sizeof(fftw_complex)*M);
     memset(F,0,M*sizeof(fftw_complex));
     
-    for (int i=0;i<N;i++){
+    for (int i=0; i<N ; i++){
+	memcpy(&F[i][0],filter + ((int)floor((2.0f*N-1.0f)/2.0f)+1+i) * N, N);
+    }
+    /*for (int i=0;i<N;i++){
 	F[i]=filter[(int)floor((2.0f*N-1.0f)/2.0f)+1+i];
-    }
+    }*/
     for (int i=(M-N+1);i<M;i++){
-	F[i]=filter[i-(M-N+1)+1];
+	memcpy(&F[i][0],filter + (i-(M-N+1)+1) * N, N);
     }
+    /*for (int i=(M-N+1);i<M;i++){
+	F[i]=filter[i-(M-N+1)+1];
+    }*/
 
     // Allocate complex output vectors for row and filter FFTs
     fftw_complex * R_fourier=(fftw_complex*)fftw_malloc(sizeof(fftw_complex)*M);
@@ -681,8 +690,11 @@ void filter_cpu(float * row, float * filter, int N){
     //Multiply row and filter into output array
     fftw_complex * O_fourier=(fftw_complex*)fftw_malloc(sizeof(fftw_complex)*M);
     for (int i=0;i<M;i++){
-	O_fourier[i]=R_fourier[i]*F_fourier[i];
+	memset(&O_fourier[i][0],R_fourier[i][0]*F_fourier[i][0], sizeof(fftw_complex));
     }
+    /*for (int i=0;i<M;i++){
+	O_fourier[i]=R_fourier[i]*F_fourier[i];
+    }*/
 
     //Prep final output array and plan, then execute
     fftw_complex * O=(fftw_complex*)fftw_malloc(sizeof(fftw_complex)*M);
@@ -692,7 +704,8 @@ void filter_cpu(float * row, float * filter, int N){
 
     //Copy real portion of final result into source row
     for (int i=0;i<N;i++){
-	row[i]=(1.0f/(float)M)*(float)creal(O[i]);
+	row[i]=(1.0f/(float)M)*(float)creal(O[i][0]);
+        //row[i]=(1.0f/(float)M)*(float)creal(O[i]);
     }
 
     // Clean up
